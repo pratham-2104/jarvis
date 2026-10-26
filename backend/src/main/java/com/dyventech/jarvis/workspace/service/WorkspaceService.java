@@ -105,6 +105,41 @@ public class WorkspaceService {
         }
     }
 
+    public String getAggregatedWorkspaceContext(String workspaceName) {
+        StringBuilder sb = new StringBuilder();
+        
+        // Brand data
+        sb.append("### BRAND GUIDELINES & DESIGN SYSTEM ###\n");
+        sb.append(readSubdirContent(workspaceName, "brand"));
+        
+        // Knowledge data
+        sb.append("\n\n### APPLICATION DOCUMENTATION & FEATURES ###\n");
+        sb.append(readSubdirContent(workspaceName, "knowledge"));
+        
+        return sb.toString();
+    }
+
+    private String readSubdirContent(String workspaceName, String subdir) {
+        Path path = ROOT_PATH.resolve(workspaceName).resolve(subdir);
+        if (!Files.exists(path)) return "(No files found in " + subdir + ")";
+        try (Stream<Path> stream = Files.walk(path)) {
+            return stream.filter(Files::isRegularFile)
+                    .filter(p -> !p.getFileName().toString().startsWith("."))
+                    .map(p -> "=== FILE: " + p.getFileName() + " ===\n" + readFileQuietly(p))
+                    .collect(Collectors.joining("\n\n"));
+        } catch (Exception e) {
+            return "Error reading " + subdir + ": " + e.getMessage();
+        }
+    }
+
+    private String readFileQuietly(Path path) {
+        try {
+            return Files.readString(path);
+        } catch (Exception e) {
+            return "Error reading file " + path.getFileName() + ": " + e.getMessage();
+        }
+    }
+
     private List<String> getFilesFromSubdir(String workspaceName, String subdir) {
         Path path = ROOT_PATH.resolve(workspaceName).resolve(subdir);
         if (!Files.exists(path)) return Collections.emptyList();

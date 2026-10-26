@@ -25,6 +25,9 @@ public class OrchestratorService {
     @Inject
     com.dyventech.jarvis.scriptAgent.service.ScriptAgent scriptAgent;
 
+    @Inject
+    com.dyventech.jarvis.workspace.service.WorkspaceService workspaceService;
+
     public PipelineResponse startPipeline(String appName, String userPrompt) {
         String sessionId = UUID.randomUUID().toString();
         PipelineContext context = PipelineContext.builder()
@@ -49,7 +52,10 @@ public class OrchestratorService {
         
         String combinedPrompt = "Initial User Vision: " + initialPrompt + " | Feedback for Re-Research: " + feedback;
         
-        String result = researchAgent.execute(context.getAppName(), combinedPrompt);
+        // Deterministically pre-load workspace knowledge and brand guidelines from disk
+        String appKnowledge = workspaceService.getAggregatedWorkspaceContext(context.getAppName());
+
+        String result = researchAgent.execute(context.getAppName(), appKnowledge, combinedPrompt);
         context.setResearchOutput(result);
         repository.save(context);
         
@@ -127,12 +133,18 @@ public class OrchestratorService {
 
         ContentIdeaDTO idea = context.getSelectedIdea();
         
+        // Deterministically pre-load workspace knowledge and brand guidelines from disk
+        String workspaceContext = workspaceService.getAggregatedWorkspaceContext(context.getAppName());
+
         String result = scriptAgent.generateScript(
                 context.getAppName(),
+                workspaceContext,
                 idea.getTitle(),
                 idea.getDescription(),
                 idea.getHook(),
                 idea.getPlatform(),
+                idea.getIntent() != null ? idea.getIntent() : "Authority",
+                idea.getHookType() != null ? idea.getHookType() : "Curiosity Gap",
                 context.getResearchOutput(),
                 context.getIdeaFeedback() != null ? context.getIdeaFeedback() : "None"
         );
