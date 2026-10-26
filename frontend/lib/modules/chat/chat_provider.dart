@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../models/pipeline_status.dart';
 import '../../models/history_item.dart';
 import '../../services/pipeline_service.dart';
 

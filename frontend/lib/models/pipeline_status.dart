@@ -4,6 +4,8 @@ class SuggestedIdea {
   final String description;
   final String platform;
   final String hook;
+  final String? intent;
+  final String? hookType;
 
   SuggestedIdea({
     required this.id,
@@ -11,6 +13,8 @@ class SuggestedIdea {
     required this.description,
     required this.platform,
     required this.hook,
+    this.intent,
+    this.hookType,
   });
 
   factory SuggestedIdea.fromJson(Map<String, dynamic> json) {
@@ -20,6 +24,8 @@ class SuggestedIdea {
       description: json['description'] ?? '',
       platform: json['platform'] ?? '',
       hook: json['hook'] ?? '',
+      intent: json['intent'],
+      hookType: json['hookType'],
     );
   }
 }

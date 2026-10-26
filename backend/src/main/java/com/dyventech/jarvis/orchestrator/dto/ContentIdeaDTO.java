@@ -16,4 +16,6 @@ public class ContentIdeaDTO {
     private String description;
     private String platform;
     private String hook;
+    private String intent;    // COCA: Growth, Objection, Connection, Authority
+    private String hookType;  // Visual, Contrarian, Curiosity Gap, Question, Teaser
 }

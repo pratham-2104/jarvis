@@ -30,6 +30,21 @@ public class ResearchTool extends BaseAgentActions {
         }
     }
 
+    @Tool("Read brand guidelines and positioning from the local workspace")
+    public String readBrandGuidelines(String appName) {
+        logAction("readBrandGuidelines", appName);
+        Path path = Paths.get("workspaces", appName, "brand");
+        if (!Files.exists(path)) return "No brand files found for " + appName;
+        try (var stream = Files.walk(path)) {
+            return stream.filter(Files::isRegularFile)
+                    .filter(p -> !p.getFileName().toString().startsWith(".")) // Filter hidden files like .DS_Store
+                    .map(this::readFileContent)
+                    .collect(Collectors.joining("\n---\n"));
+        } catch (Exception e) {
+            return "Error reading brand guidelines: " + e.getMessage();
+        }
+    }
+
     @Tool("Search for trending content ideas related to the app niche on Tavily")
     public String searchTrendingIdeas(String niche) {
         logAction("searchTrendingIdeas", niche);

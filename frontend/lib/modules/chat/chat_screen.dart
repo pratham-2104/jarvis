@@ -97,23 +97,116 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildIdeaCard(BuildContext context, dynamic idea) {
     final controller = TextEditingController();
+    
+    Color getIntentColor(String? intent) {
+      switch (intent?.toLowerCase()) {
+        case 'growth':
+          return Colors.green.shade100;
+        case 'authority':
+          return Colors.purple.shade100;
+        case 'connection':
+          return Colors.orange.shade100;
+        case 'objection':
+          return Colors.blue.shade100;
+        default:
+          return Colors.grey.shade200;
+      }
+    }
+
     return Card(
+      elevation: 2,
       margin: const EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                if (idea.intent != null && idea.intent.toString().isNotEmpty)
+                  Chip(
+                    label: Text(
+                      idea.intent.toString().toUpperCase(),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                    ),
+                    backgroundColor: getIntentColor(idea.intent),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                if (idea.hookType != null && idea.hookType.toString().isNotEmpty)
+                  Chip(
+                    avatar: const Icon(Icons.flash_on, size: 14, color: Colors.amber),
+                    label: Text(
+                      idea.hookType.toString(),
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                    backgroundColor: Colors.amber.shade50,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                if (idea.platform != null && idea.platform.toString().isNotEmpty)
+                  Chip(
+                    label: Text(
+                      idea.platform.toString(),
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                    backgroundColor: Colors.grey.shade100,
+                    visualDensity: VisualDensity.compact,
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
             Text(idea.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Text(idea.description),
-            const Divider(),
+            Text(idea.description, style: TextStyle(color: Colors.grey.shade800, height: 1.3)),
+            if (idea.hook != null && idea.hook.toString().isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.blueGrey.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blueGrey.shade200),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('🪝 ', style: TextStyle(fontSize: 16)),
+                    Expanded(
+                      child: Text(
+                        'Hook: "${idea.hook}"',
+                        style: const TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const Divider(height: 24),
             Row(
               children: [
-                Expanded(child: TextField(controller: controller, decoration: const InputDecoration(hintText: 'Feedback (optional)'))),
+                Expanded(
+                  child: TextField(
+                    controller: controller,
+                    decoration: const InputDecoration(
+                      hintText: 'Feedback or refinement (optional)',
+                      isDense: true,
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: () => context.read<ChatProvider>().submitAction(idea.id, controller.text),
-                  child: const Text('Select'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                  child: const Text('Select Idea'),
                 ),
               ],
             )
