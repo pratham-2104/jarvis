@@ -45,8 +45,8 @@ class WorkspaceService {
       headers: {'Content-Type': 'text/plain'},
     );
 
-    if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception('Failed to add file to $folderName');
+    if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 202) {
+      throw Exception('Failed to add file to $folderName: ${response.statusCode}');
     }
   }
 }

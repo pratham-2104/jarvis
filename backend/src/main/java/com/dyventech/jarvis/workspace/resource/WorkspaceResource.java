@@ -51,10 +51,23 @@ public class WorkspaceResource {
 
     @POST
     @Path("/{name}/files")
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.WILDCARD, MediaType.APPLICATION_JSON})
     public Response addFile(
             @PathParam("name") String name, 
             @QueryParam("subdir") @DefaultValue("knowledge") String subdir,
             @QueryParam("fileName") String fileName, 
+            String content) {
+        workspaceService.saveKnowledgeFile(name, subdir, fileName, content);
+        return Response.accepted().build();
+    }
+
+    @POST
+    @Path("/{name}/{subdir}")
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.WILDCARD, MediaType.APPLICATION_JSON})
+    public Response addFileToSubdir(
+            @PathParam("name") String name,
+            @PathParam("subdir") String subdir,
+            @QueryParam("fileName") String fileName,
             String content) {
         workspaceService.saveKnowledgeFile(name, subdir, fileName, content);
         return Response.accepted().build();

@@ -96,9 +96,38 @@ class _WorkspaceListScreenState extends State<WorkspaceListScreen> {
     return ExpansionTile(
       leading: const Icon(Icons.folder_open, size: 20),
       title: Text(folderName),
-      trailing: IconButton(
-        icon: const Icon(Icons.add_circle_outline, size: 20),
-        onPressed: () => _showAddFileDialog(context, workspaceName, folderName),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            tooltip: 'Upload .md or .txt file',
+            icon: const Icon(Icons.upload_file, size: 20, color: Colors.blueGrey),
+            onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              try {
+                final uploaded = await context
+                    .read<WorkspaceProvider>()
+                    .pickAndUploadFile(workspaceName, folderName);
+                if (!mounted) return;
+                if (uploaded) {
+                  messenger.showSnackBar(
+                    SnackBar(content: Text('File uploaded to $workspaceName / $folderName')),
+                  );
+                }
+              } catch (e) {
+                if (!mounted) return;
+                messenger.showSnackBar(
+                  SnackBar(content: Text('Upload failed: $e'), backgroundColor: Colors.red),
+                );
+              }
+            },
+          ),
+          IconButton(
+            tooltip: 'Create file manually',
+            icon: const Icon(Icons.note_add_outlined, size: 20),
+            onPressed: () => _showAddFileDialog(context, workspaceName, folderName),
+          ),
+        ],
       ),
       children: files.map((file) => ListTile(
         contentPadding: const EdgeInsets.only(left: 72),
@@ -175,25 +204,94 @@ class _WorkspaceListScreenState extends State<WorkspaceListScreen> {
   void _showAddFileDialog(BuildContext context, String workspaceName, String folderName) {
     final nameController = TextEditingController();
     final contentController = TextEditingController();
+    final messenger = ScaffoldMessenger.of(context);
+    final provider = context.read<WorkspaceProvider>();
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogCtx) => AlertDialog(
         title: Text('Add to $workspaceName / $folderName'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: nameController, decoration: const InputDecoration(hintText: 'File Name')),
-            TextField(controller: contentController, decoration: const InputDecoration(hintText: 'Content')),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              OutlinedButton.icon(
+                icon: const Icon(Icons.upload_file),
+                label: const Text('Pick Local File (.md, .txt)'),
+                onPressed: () async {
+                  Navigator.pop(dialogCtx);
+                  try {
+                    final uploaded = await provider.pickAndUploadFile(workspaceName, folderName);
+                    if (!mounted) return;
+                    if (uploaded) {
+                      messenger.showSnackBar(
+                        SnackBar(content: Text('File uploaded to $workspaceName / $folderName')),
+                      );
+                    }
+                  } catch (e) {
+                    if (!mounted) return;
+                    messenger.showSnackBar(
+                      SnackBar(content: Text('Upload failed: $e'), backgroundColor: Colors.red),
+                    );
+                  }
+                },
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  children: [
+                    Expanded(child: Divider()),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text('OR TYPE MANUALLY', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                    ),
+                    Expanded(child: Divider()),
+                  ],
+                ),
+              ),
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  hintText: 'File Name (e.g. features.md)',
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: contentController,
+                decoration: const InputDecoration(
+                  hintText: 'File content...',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 5,
+              ),
+            ],
+          ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(dialogCtx), child: const Text('Cancel')),
           TextButton(
-            onPressed: () {
-              context.read<WorkspaceProvider>().uploadFile(folderName, nameController.text, contentController.text);
-              Navigator.pop(context);
+            onPressed: () async {
+              if (nameController.text.isNotEmpty) {
+                final nav = Navigator.of(dialogCtx);
+                try {
+                  await provider.uploadFile(
+                    workspaceName,
+                    folderName,
+                    nameController.text,
+                    contentController.text,
+                  );
+                  nav.pop();
+                } catch (e) {
+                  if (!mounted) return;
+                  messenger.showSnackBar(
+                    SnackBar(content: Text('Save failed: $e'), backgroundColor: Colors.red),
+                  );
+                }
+              }
             },
-            child: const Text('Upload'),
+            child: const Text('Save File'),
           ),
         ],
       ),
