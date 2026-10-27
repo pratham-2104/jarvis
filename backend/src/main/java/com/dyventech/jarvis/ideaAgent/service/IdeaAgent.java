@@ -14,13 +14,20 @@ public interface IdeaAgent {
 
     @SystemMessage(fromResource = "prompts/idea-agent.txt")
     @UserMessage("""
-            Generate content ideas based on the following research:
+            Generate fresh, non-duplicate content ideas based on the following research:
             {researchOutput}
+
+            PREVIOUSLY CREATED SCRIPTS (DO NOT REPEAT THESE TOPICS OR ANGLES):
+            {contentHistory}
 
             Additional Feedback/Constraints:
             {feedback}
             """)
     @Agent("Creative Content Strategist")
     @ToolBox({ IdeaTool.class })
-    IdeaResponse generate(@V("researchOutput") String researchOutput, @V("feedback") String feedback);
+    IdeaResponse generate(
+            @V("researchOutput") String researchOutput,
+            @V("contentHistory") String contentHistory,
+            @V("feedback") String feedback
+    );
 }

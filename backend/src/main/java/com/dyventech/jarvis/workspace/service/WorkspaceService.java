@@ -119,6 +119,21 @@ public class WorkspaceService {
         return sb.toString();
     }
 
+    public String getCreatedContentHistory(String workspaceName) {
+        Path path = ROOT_PATH.resolve(workspaceName).resolve("scripts");
+        if (!Files.exists(path)) return "None (no previous scripts generated yet).";
+        try (Stream<Path> stream = Files.list(path)) {
+            List<String> scriptTitles = stream.filter(Files::isRegularFile)
+                    .filter(p -> !p.getFileName().toString().startsWith("."))
+                    .map(p -> "- " + p.getFileName().toString().replace(".md", "").replace("_", " "))
+                    .collect(Collectors.toList());
+            if (scriptTitles.isEmpty()) return "None (no previous scripts generated yet).";
+            return String.join("\n", scriptTitles);
+        } catch (Exception e) {
+            return "Error reading script history: " + e.getMessage();
+        }
+    }
+
     private String readSubdirContent(String workspaceName, String subdir) {
         Path path = ROOT_PATH.resolve(workspaceName).resolve(subdir);
         if (!Files.exists(path)) return "(No files found in " + subdir + ")";

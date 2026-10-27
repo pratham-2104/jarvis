@@ -71,7 +71,14 @@ public class OrchestratorService {
         
         String combinedFeedback = "Initial Vision: " + initialPrompt + " | Recent Feedback: " + feedback;
         
-        com.dyventech.jarvis.orchestrator.dto.IdeaResponse response = ideaAgent.generate(context.getResearchOutput(), combinedFeedback);
+        // Fetch previously generated scripts from workspace to enforce anti-duplication
+        String contentHistory = workspaceService.getCreatedContentHistory(context.getAppName());
+
+        com.dyventech.jarvis.orchestrator.dto.IdeaResponse response = ideaAgent.generate(
+                context.getResearchOutput(), 
+                contentHistory, 
+                combinedFeedback
+        );
         List<ContentIdeaDTO> ideas = response.getIdeas();
         
         context.setSuggestedIdeas(ideas);

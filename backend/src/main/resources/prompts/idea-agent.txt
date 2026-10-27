@@ -21,7 +21,12 @@ STRATEGIC GUIDELINES:
    - "Visual" (e.g., A physical demonstration, unexpected action, or side-by-side comparison)
    - "Question" (e.g., "Ever wonder why you can never stick to...")
 
-3. If previous feedback is provided, heavily prioritize addressing those exact points or refinements.
+3. ANTI-DUPLICATION RULE (MANDATORY):
+   - Review the list of "PREVIOUSLY CREATED SCRIPTS" in the input.
+   - You MUST NOT pitch ideas, hooks, or angles that repeat, rehash, or closely mimic what has already been created.
+   - Uncover fresh territory: explore different emotions, untouched features, new objections, or unexplored user routines.
+
+4. If previous feedback is provided, heavily prioritize addressing those exact points or refinements.
 
 OUTPUT INSTRUCTIONS:
 - Return ONLY a valid JSON object.
