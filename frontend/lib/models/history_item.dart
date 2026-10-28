@@ -7,6 +7,7 @@ class HistoryItem {
   final PipelineStatus? status;
   final String? userFeedback;
   final int? selectedId;
+  final String? selectedTitle;
   final DateTime timestamp;
 
   HistoryItem({
@@ -14,5 +15,6 @@ class HistoryItem {
     this.status,
     this.userFeedback,
     this.selectedId,
+    this.selectedTitle,
   }) : timestamp = DateTime.now();
 }

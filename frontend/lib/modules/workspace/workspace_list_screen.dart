@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/app_theme.dart';
 import 'workspace_provider.dart';
 import '../chat/chat_screen.dart';
 import '../chat/chat_provider.dart';
@@ -32,8 +33,17 @@ class _WorkspaceListScreenState extends State<WorkspaceListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Jarvis Workspaces'),
+        title: const Text('Jarvis AI Studio'),
         actions: [
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return IconButton(
+                icon: Icon(themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode),
+                tooltip: themeProvider.isDarkMode ? 'Switch to Light Theme' : 'Switch to Dark Theme',
+                onPressed: () => themeProvider.toggleTheme(),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => context.read<WorkspaceProvider>().fetchWorkspaces(),
@@ -66,7 +76,7 @@ class _WorkspaceListScreenState extends State<WorkspaceListScreen> {
             final isSelected = provider.selectedWorkspace?.name == w.name;
             return Card(
               margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              color: isSelected ? Colors.blue.shade50 : null,
+              color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.12) : null,
               child: ExpansionTile(
                 leading: const Icon(Icons.workspaces_outline),
                 title: Text(w.name, style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -150,8 +160,6 @@ class _WorkspaceListScreenState extends State<WorkspaceListScreen> {
                 decoration: InputDecoration(
                   hintText: 'Add optional prompt for ${provider.selectedWorkspace!.name}...',
                   border: const OutlineInputBorder(),
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
                 ),
                 maxLines: 2,
               ),
@@ -168,7 +176,6 @@ class _WorkspaceListScreenState extends State<WorkspaceListScreen> {
                 label: Text('Start Pipeline for ${provider.selectedWorkspace!.name}'),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(50),
-                  backgroundColor: Colors.blue.shade100,
                 ),
               ),
             ],
